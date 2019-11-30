@@ -7,6 +7,22 @@ const serialize = (user) => (
   { id: user._id, email: user.email }
 )
 
+const getUser = async (req, res, next) => {
+  let user
+
+  try {
+    user = await User.findById(req.params.id)
+    if (user == null) {
+      return res.status(404).json({ message: "Can't find user" })
+    }
+  } catch (err) {
+    return res.status(500).json({ message: err.message })
+  }
+
+  res.user = user
+  next()
+}
+
 // index
 router.get('/', async (req, res) => {
   try {
@@ -35,15 +51,35 @@ router.post('/', async (req, res) => {
 })
 
 // show
-router.get('/:id', (req, res) => {
+router.get('/:id', getUser, (req, res) => {
+  res.json(serialize(res.user))
 })
 
 // update
-router.patch('/:id', (req, res) => {
+router.patch('/:id', getUser, async (req, res) => {
+  if (req.body.email != null) {
+    res.user.email = req.body.email
+  }
+
+  if (req.body.password != null) {
+    res.user.password = await argon2.hash(req.body.password)
+  }
+  try {
+    const updatedUser = await res.user.save()
+    res.json(serialize(updatedUser))
+  } catch (err) {
+    res.status(400).json({ message: err.message })
+  }
 })
 
 // delete
-router.delete('/:id', (req, res) => {
+router.delete('/:id', getUser, async (req, res) => {
+  try {
+    await res.user.remove()
+    res.json({ message: 'Deleted This User' })
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
 })
 
 module.exports = router
