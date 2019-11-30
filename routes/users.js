@@ -34,20 +34,24 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body
   const failureMessage = 'Incorrect email or password'
 
-  const foundUser = await User.findOne({ email })
-  if (!foundUser) {
-    throw new Error(failureMessage)
-  } else {
-    const correctPassword = await argon2.verify(foundUser.password, password)
-    if (!correctPassword) {
+  try {
+    const foundUser = await User.findOne({ email })
+    if (!foundUser) {
       throw new Error(failureMessage)
+    } else {
+      const correctPassword = await argon2.verify(foundUser.password, password)
+      if (!correctPassword) {
+        throw new Error(failureMessage)
+      } else {
+        res.json({
+          user: serialize(foundUser),
+          token: generateJWT(foundUser)
+        })
+      }
     }
+  } catch (err) {
+    res.status(500).json({ message: err.message })
   }
-
-  res.json({
-    user: serialize(foundUser),
-    token: generateJWT(foundUser)
-  })
 })
 
 // index
