@@ -1,10 +1,16 @@
+require('dotenv').config()
 const argon2 = require('argon2')
+const jwt = require('jsonwebtoken')
 const express = require('express')
 const router = express.Router()
 const User = require('../models/user')
 
 const serialize = (user) => (
   { id: user._id, email: user.email }
+)
+
+const generateJWT = (user) => (
+  jwt.sign(serialize(user), process.env.SIGNATURE, { expiresIn: '6h' })
 )
 
 const getUser = async (req, res, next) => {
@@ -22,6 +28,27 @@ const getUser = async (req, res, next) => {
   res.user = user
   next()
 }
+
+// login
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body
+  const failureMessage = 'Incorrect email or password'
+
+  const foundUser = await User.findOne({ email })
+  if (!foundUser) {
+    throw new Error(failureMessage)
+  } else {
+    const correctPassword = await argon2.verify(foundUser.password, password)
+    if (!correctPassword) {
+      throw new Error(failureMessage)
+    }
+  }
+
+  res.json({
+    user: serialize(foundUser),
+    token: generateJWT(foundUser)
+  })
+})
 
 // index
 router.get('/', async (req, res) => {
