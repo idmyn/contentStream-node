@@ -55,6 +55,14 @@ class API {
     }).then(creds => this.createAccount(id, creds))
   }
 
+  static findAccounts = async (userId) => {
+    try {
+      return Account.find({ user: userId, domain: 'twitter.com' })
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   static createAccount = async (userId, creds) => {
     try {
       const user = await User.findOne({_id: userId})
