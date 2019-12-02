@@ -50,32 +50,24 @@ class API {
       oauthKey = response.split('&')[0].split('=')[1]
       oauthSecret = response.split('&')[1].split('=')[1]
       const creds = { oauthKey, oauthSecret }
-      console.log(creds)
+      // console.log(creds)
       return { oauthKey, oauthSecret }
-    }).then(creds => {
-      try {
-        return User.findOne({_id: id})
-      } catch (err) {
-        console.log(err)
-      }
-    }).then(foundUser =>{
-      console.log('yay!', foundUser, )
-      user = foundUser
-      try {
-        const account = new Account({
-          domain: 'twitter.com',
-          oauthKey: oauthKey,
-          oauthSecret: oauthSecret,
-          user: user._id
-        })
-        console.log(account)
-        return account.save()
-      } catch (err) {
-        console.log(err)
-      }
-    }).then(account => {
-      console.log('saved account:', account)
-    })
+    }).then(creds => this.createAccount(id, creds))
+  }
+
+  static createAccount = async (userId, creds) => {
+    try {
+      const user = await User.findOne({_id: userId})
+      const account = new Account({
+        domain: 'twitter.com',
+        oauthKey: creds.oauthKey,
+        oauthSecret: creds.oauthSecret,
+        user: user._id
+      })
+      return await account.save()
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   static buildTwitterClient = (creds) => {
