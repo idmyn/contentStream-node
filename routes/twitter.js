@@ -39,6 +39,29 @@ router.get('/success', async(req, res) => {
       } 
 })
 
+router.get('/create_tweet', async(req, res) => {
+    try {
+      const post = await client.post('statuses/update', {
+        status: "Status"
+      })
+      .catch(console.log)
+      res.redirect('http://localhost:3001')
+      //Redirect this back to the main page
+    } catch (err) {
+      res.status(500).json({ message: err.message })
+    }
+})
+
+router.get('/hometimeline', async(req, res) => {
+  try {
+    const timeline = await client.get('statuses/home_timeline', {})
+    .then(timeline => timeline.map(post => post.id_str))
+    .then(postIds => res.json(postIds))
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
 const sendrequestToTwitter = async (tmpOauthToken, oauthVerifier, tmpOauthTokenSecret) => {
     const requestConfig = {
       headers: { Accept: '*/*', Connection: 'close', 'User-Agent': 'node-twitter/1' },
@@ -70,9 +93,9 @@ const createTwitterSesssion = async(result) => {
     })
 }
 
-const postTweet = async() => {
+const postTweet = async(status) => {
     const post = await client.post('statuses/update', {
-        status: 'Please Please Please £1 fish £1 fish'
+        status: status
     })
     .catch(console.log)
 }
