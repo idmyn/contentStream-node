@@ -50,6 +50,7 @@ router.post('/login', async (req, res) => {
       }
     }
   } catch (err) {
+    console.log(err)
     res.status(500).json({ message: err.message })
   }
 })
@@ -75,7 +76,10 @@ router.post('/', async (req, res) => {
 
   try {
     const newUser = await user.save()
-    res.status(201).json(serialize(newUser))
+    res.status(201).json({
+      user: serialize(newUser),
+      token: generateJWT(newUser)
+    })
   } catch (err) {
     res.status(400).json({ message: err.message })
   }
