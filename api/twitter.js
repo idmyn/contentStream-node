@@ -1,6 +1,8 @@
 const request = require('request-promise-native')
 const Twitter = require('twitter')
 const encodeUrl = require('encodeurl')
+const User = require('../models/user')
+const Account = require('../models/account')
 
 const consumerKey = process.env.TWITTER_KEY
 const consumerSecret = process.env.TWITTER_SECRET
@@ -28,9 +30,12 @@ class API {
     })
   }
 
-  static requestTwitterCreds = ({
+  static requestTwitterCreds = async ({
     oauth_token, oauth_verifier
-  }) => {
+  }, id) => {
+    let oauthKey
+    let oauthSecret
+    let user
     return request.post({
       twitterHeaders,
       oauth: {
@@ -42,9 +47,42 @@ class API {
       },
       url: 'https://api.twitter.com/oauth/access_token'
     }).then(response => {
-      const oauthKey = response.split('&')[0].split('=')[1]
-      const oauthSecret = response.split('&')[1].split('=')[1]
+      oauthKey = response.split('&')[0].split('=')[1]
+      oauthSecret = response.split('&')[1].split('=')[1]
+      const creds = { oauthKey, oauthSecret }
+      console.log(creds)
       return { oauthKey, oauthSecret }
+    }).then(creds => {
+      try {
+        return User.findOne({_id: id})
+      } catch (err) {
+        console.log(err)
+      }
+    }).then(foundUser =>{
+      console.log('yay!', foundUser, )
+      user = foundUser
+      try {
+        const account = new Account({
+          domain: 'twitter.com',
+          oauthKey: oauthKey,
+          oauthSecret: oauthSecret
+        })
+        console.log(account)
+        return account.save()
+      } catch (err) {
+        console.log(err)
+      }
+    }).then(account => {
+      console.log('saved account:', account)
+      try {
+        console.log('hi', user)
+        user.accounts.push(account._id)
+        return user.save()
+      } catch (err) {
+        console.log(err)
+      }
+    }).then(savedUser => {
+      console.log(savedUser)
     })
   }
 
