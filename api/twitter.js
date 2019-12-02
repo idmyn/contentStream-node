@@ -28,18 +28,17 @@ class API {
     })
   }
 
-  static requestTwitterCreds = (
-    tmpOauthToken,
-    oauthVerifier
-  ) => {
+  static requestTwitterCreds = ({
+    oauth_token, oauth_verifier
+  }) => {
     return request.post({
       twitterHeaders,
       oauth: {
         consumer_key: consumerKey,
         consumer_secret: consumerSecret,
-        token: tmpOauthToken,
+        token: oauth_token,
         token_secret: this.tmpOauthTokenSecret,
-        verifier: oauthVerifier
+        verifier: oauth_verifier
       },
       url: 'https://api.twitter.com/oauth/access_token'
     }).then(response => {

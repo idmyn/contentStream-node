@@ -13,7 +13,7 @@ router.get('/login', async (req, res) => {
 
 router.get('/success', async (req, res) => {
   try {
-    API.requestTwitterCreds(req.query.oauth_token, req.query.oauth_verifier)
+    API.requestTwitterCreds({ ...req.query })
       .then(API.buildTwitterClient)
       .then(API.postTweet)
     res.redirect('/')
