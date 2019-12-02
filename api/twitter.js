@@ -5,14 +5,11 @@ const encodeUrl = require('encodeurl')
 const consumerKey = process.env.TWITTER_KEY
 const consumerSecret = process.env.TWITTER_SECRET
 
-let tmpOauthTokenSecret
-
 const twitterHeaders = {
   Accept: '*/*',
   Connection: 'close',
   'User-Agent': 'node-twitter/1'
 }
-
 
 class API {
   static buildAuthURL = () => {
@@ -26,15 +23,14 @@ class API {
       url: 'https://api.twitter.com/oauth/request_token'
     }).then(response => {
       const tmpOauthToken = response.split('&')[0].split('=')[1]
-      tmpOauthTokenSecret = response.split('&')[1].split('=')[1]
+      this.tmpOauthTokenSecret = response.split('&')[1].split('=')[1]
       return 'https://api.twitter.com/oauth/authorize?oauth_token=' + tmpOauthToken
     })
   }
 
   static requestTwitterCreds = (
     tmpOauthToken,
-    oauthVerifier,
-    tmpOauthTokenSecret
+    oauthVerifier
   ) => {
     return request.post({
       twitterHeaders,
@@ -42,7 +38,7 @@ class API {
         consumer_key: consumerKey,
         consumer_secret: consumerSecret,
         token: tmpOauthToken,
-        token_secret: tmpOauthTokenSecret,
+        token_secret: this.tmpOauthTokenSecret,
         verifier: oauthVerifier
       },
       url: 'https://api.twitter.com/oauth/access_token'
