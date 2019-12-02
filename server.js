@@ -23,4 +23,7 @@ app.use('/posts', postsRouter)
 const bucketsRouter = require('./routes/buckets')
 app.use('/buckets', bucketsRouter)
 
+const twitterRouter = require('./routes/twitter')
+app.use('/twitter', twitterRouter)
+
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`))
