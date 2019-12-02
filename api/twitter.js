@@ -65,7 +65,8 @@ class API {
         const account = new Account({
           domain: 'twitter.com',
           oauthKey: oauthKey,
-          oauthSecret: oauthSecret
+          oauthSecret: oauthSecret,
+          user: user._id
         })
         console.log(account)
         return account.save()
@@ -74,15 +75,6 @@ class API {
       }
     }).then(account => {
       console.log('saved account:', account)
-      try {
-        console.log('hi', user)
-        user.accounts.push(account._id)
-        return user.save()
-      } catch (err) {
-        console.log(err)
-      }
-    }).then(savedUser => {
-      console.log(savedUser)
     })
   }
 
