@@ -117,4 +117,13 @@ router.delete('/:id', getUser, async (req, res) => {
   }
 })
 
+router.get('/validate', async (req, res) => {
+  try {
+    req.headers["Authorisation"]
+    res.json({user: req.user, token: generateJWT(user)})
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+ 
 module.exports = router
