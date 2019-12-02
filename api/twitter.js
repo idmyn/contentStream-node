@@ -57,11 +57,11 @@ class API {
     })
   }
 
-  static postTweet = (client) => {
+  static postTweet = (client, content) => {
     console.log(client)
     client
       .post('statuses/update', {
-        status: 'Please Please Please £1 fish £1 fish'
+        status: content
       }).catch(console.log)
   }
 }
