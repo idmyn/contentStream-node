@@ -90,8 +90,12 @@ router.get('/timeline', async (req, res) => {
   //     .get('statuses/home_timeline', {})
   //     .then(timeline => timeline.map(post => post.id_str))
   //     .then(postIds => res.json(postIds))
+  console.log('headers', req.headers)
+  const token = req.headers.authorisation
+  const decoded = jwt.verify(token, process.env.SIGNATURE)
+  console.log('decoded', decoded)
   try {
-    res.json(req)
+    res.json("hi")
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
