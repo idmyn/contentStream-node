@@ -14,14 +14,23 @@ router.get('/', async (req, res) => {
 
 // create
 router.post('/', async (req, res) => {
-  const post = new Post({
-    sourceId: req.body.id,
-    domain: req.body.domain
-  })
+  try {
+    const foundPost = Post.findOne({ sourceId: req.body.id })
+  } catch (err) {
+    res.status(400).json({ message: err.message })
+  }
+
+  // const post = new Post({
+  //   sourceId: req.body.id,
+  //   domain: req.body.domain
+  // })
+
+  // post.buckets.push(req.bucketId)
 
   try {
-    const newPost = await post.save()
-    res.status(201).json(newPost)
+    // const newPost = await post.save()
+    // res.status(201).json(newPost)
+    res.json("post recieved", foundPost)
   } catch (err) {
     res.status(400).json({ message: err.message })
   }

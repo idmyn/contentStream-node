@@ -20,7 +20,7 @@ class API {
       oauth: {
         consumer_key: consumerKey,
         consumer_secret: consumerSecret,
-        callback: encodeUrl('http://localhost:3001/twitter/success')
+        callback: encodeUrl('http://localhost:3000/home')
       },
       url: 'https://api.twitter.com/oauth/request_token'
     }).then(response => {
@@ -52,7 +52,8 @@ class API {
       const creds = { oauthKey, oauthSecret }
       // console.log(creds)
       return { oauthKey, oauthSecret }
-    }).then(creds => this.createAccount(id, creds))
+    })
+    // }).then(creds => this.createAccount(id, creds))
   }
 
   static findAccounts = async (userId) => {
@@ -79,6 +80,7 @@ class API {
   }
 
   static buildTwitterClient = (creds) => {
+    console.log('hello', creds, consumerKey, consumerSecret)
     return new Twitter({
       consumer_key: consumerKey,
       consumer_secret: consumerSecret,

@@ -3,71 +3,100 @@ const jwt = require('jsonwebtoken')
 const express = require('express')
 const router = express.Router()
 const API = require('../api/twitter')
-const User = require('../models/user')
+const Account = require('../models/account')
 
-const fakeHeader = {
-  "user": {
-    "id": "5de549a4cefe4a469b587f8b",
-    "email": "newnewnew@twitter.com"
-  },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVkZTU0OWE0Y2VmZTRhNDY5YjU4N2Y4YiIsImVtYWlsIjoibmV3bmV3bmV3QHR3aXR0ZXIuY29tIiwiaWF0IjoxNTc1MzA3Njg0LCJleHAiOjE1NzUzMjkyODR9.VDu86mjU1j373A8oPqh1aB7r-GB77TwKwQFFq6hPrz4"
-}
+// const fakeHeader = {
+//   "user": {
+//     "id": "5de549a4cefe4a469b587f8b",
+//     "email": "newnewnew@twitter.com"
+//   },
+//   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVkZTU0OWE0Y2VmZTRhNDY5YjU4N2Y4YiIsImVtYWlsIjoibmV3bmV3bmV3QHR3aXR0ZXIuY29tIiwiaWF0IjoxNTc1MzA3Njg0LCJleHAiOjE1NzUzMjkyODR9.VDu86mjU1j373A8oPqh1aB7r-GB77TwKwQFFq6hPrz4"
+// }
 
-const addAccountToJWT = (account, token) => {
-  const decoded = jwt.verify(token, process.env.SIGNATURE)
-  console.log('adding acc', account)
-  console.log('decoded', decoded)
-  const newToken = {
-    id: decoded.id,
-    email: decoded.email,
-    accounts: [
-      {
-        id: account._id,
-        domain: account.domain,
-        oauthKey: account.oauthKey,
-        oauthSecret: account.oauthSecret
-      }
-    ]
-  }
-  console.log('newToken', newToken)
-  return jwt.sign(newToken, process.env.SIGNATURE, { expiresIn: '6h' })
-}
+// const addAccountToJWT = (account, token) => {
+//   const decoded = jwt.verify(token, process.env.SIGNATURE)
+//   console.log('adding acc', account)
+//   console.log('decoded', decoded)
+//   const newToken = {
+//     id: decoded.id,
+//     email: decoded.email,
+//     accounts: [
+//       {
+//         id: account._id,
+//         domain: account.domain,
+//         oauthKey: account.oauthKey,
+//         oauthSecret: account.oauthSecret
+//       }
+//     ]
+//   }
+//   console.log('newToken', newToken)
+//   return jwt.sign(newToken, process.env.SIGNATURE, { expiresIn: '6h' })
+// }
 
 router.get('/login', async (req, res) => {
   // throw error if JWT header missing
-  const token = req.headers.authorisation
   try {
+    console.log('login req received')
+    const token = req.headers.authorisation
     const decoded = jwt.verify(token, process.env.SIGNATURE)
     const accounts = await API.findAccounts(decoded.id)
-    // console.log(accounts)
+    console.log('accounts', accounts)
     if (accounts.length > 0) {
-      const newToken = addAccountToJWT(accounts[0], fakeHeader.token)
-      res.json({ token: newToken })
+      // const newToken = addAccountToJWT(accounts[0], fakeHeader.token)
+      // res.json({ token: newToken })
       // console.log(accounts[0])
+      console.log('account exists')
+      res.json("You've logged in before")
     } else {
       API.buildAuthURL().then(URL => {
-        res.status(401)
-        res.json(URL)
-      })
+        console.log('url', URL)
+        res.status(401).json(URL)
+      }).catch(err => console.log(err.message))
     }
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
 })
 
-router.get('/success', async (req, res) => {
+router.post('/success', async (req, res) => {
   // we'll change the twitter dev settings to callback to front-end, then frontend will make post to backend/twitter/success with _id and oauth tuple. this method will then store those account deets in the backend to shortcircuit the /twitter/login path next time
   try {
-    console.log('headers', req.headers)
+    // console.log('headers', req.headers)
     const token = req.headers.authorisation
     const decoded = jwt.verify(token, process.env.SIGNATURE)
     console.log('decoded', decoded)
-    API.requestTwitterCreds({ ...req.query }, fakeHeader.user.id)
-      .then(account => {
+    console.log('creds?', req.body)
+    // const account = new Account({
+    //   domain: 'twitter.com',
+    //   user: decoded.id,
+    //   oauthKey: req.body.oauth_token,
+    //   oauthSecret: req.body.oauth_verifier
+    // })
+
+    try {
+      const twitterParams = req.body
+      const creds = await API.requestTwitterCreds({ ...twitterParams })
+      console.log(creds)
+      const client = API.buildTwitterClient(creds)
+      // console.log('client', client)
+      client.get('https://api.twitter.com/1.1/statuses/home_timeline.json', {}).then(console.log).catch(console.log)
+      // client.post('statuses/update', {status: 'I Love Twitter'},  function(error, tweet, response) {
+      //   if(error) throw error;
+      //   console.log(tweet);  // Tweet body.
+      //   console.log(response);  // Raw response object.
+      // }).catch(console.log)
+    } catch (err) {
+      console.log('outer catch', err)
+    }
+
+    // res.json('Logged in!')
+
+    // API.requestTwitterCreds({ ...req.query }, fakeHeader.user.id)
+    //   .then(account => {
         // const newToken = addAccountToJWT(account, fakeHeader.token)
         // res.json({ token: newToken })
-        res.redirect('http://localhost:3000/home')
-      })
+        // res.redirect('http://localhost:3000/home')
+      // })
 
     // API.requestTwitterCreds({ ...req.query })
     //   .then(API.buildTwitterClient)
