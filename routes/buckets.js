@@ -14,8 +14,10 @@ const serialize = (bucket) => (
 // index
 router.get('/', async (req, res) => {
   try {
-    const buckets = await Bucket.find()
-    res.json(buckets)
+    const token = req.headers.authorisation
+    const decoded = jwt.verify(token, process.env.SIGNATURE)
+    const buckets = await Bucket.find({ user: decoded.id })
+    res.json(buckets.map(bucket => serialize(bucket)))
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
@@ -26,7 +28,7 @@ router.post('/', async (req, res) => {
   try {
     const token = req.headers.authorisation
     const decoded = jwt.verify(token, process.env.SIGNATURE)
-    console.log(decoded)
+    // console.log(decoded)
     const bucket = new Bucket({
       name: req.body.name,
       user: decoded.id
