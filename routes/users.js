@@ -55,6 +55,27 @@ router.post('/login', async (req, res) => {
   }
 })
 
+// validate
+router.get('/validate', async (req, res) => {
+  try {
+    const token = req.headers.authorisation
+    console.log(req.headers)
+    if (token) {
+      const decoded = jwt.verify(token, process.env.SIGNATURE)
+      const foundUser = await User.findOne({ _id: decoded.id })
+      res.json({
+        user: serialize(foundUser),
+        token
+      })
+    } else {
+      res.status(406)
+      res.json('Invalid token')
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
 // index
 router.get('/', async (req, res) => {
   try {
@@ -117,13 +138,4 @@ router.delete('/:id', getUser, async (req, res) => {
   }
 })
 
-router.get('/validate', async (req, res) => {
-  try {
-    req.headers["Authorisation"]
-    res.json({user: req.user, token: generateJWT(user)})
-  } catch (err) {
-    res.status(500).json({ message: err.message })
-  }
-})
- 
 module.exports = router
