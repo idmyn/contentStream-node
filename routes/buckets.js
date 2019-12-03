@@ -1,6 +1,15 @@
 const express = require('express')
 const router = express.Router()
 const Bucket = require('../models/bucket')
+const jwt = require('jsonwebtoken')
+
+const serialize = (bucket) => (
+  {
+    id: bucket._id,
+    name: bucket.name,
+    posts: bucket.posts
+  }
+)
 
 // index
 router.get('/', async (req, res) => {
@@ -14,14 +23,18 @@ router.get('/', async (req, res) => {
 
 // create
 router.post('/', async (req, res) => {
-  const bucket = new Bucket({
-    name: req.body.name
-  })
-
   try {
+    const token = req.headers.authorisation
+    const decoded = jwt.verify(token, process.env.SIGNATURE)
+    console.log(decoded)
+    const bucket = new Bucket({
+      name: req.body.name,
+      user: decoded.id
+    })
     const newBucket = await bucket.save()
-    res.status(201).json(newBucket)
+    res.status(201).json(serialize(newBucket))
   } catch (err) {
+    console.log(err)
     res.status(400).json({ message: err.message })
   }
 })
