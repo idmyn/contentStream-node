@@ -33,18 +33,22 @@ const addAccountToJWT = (account, token) => {
   return jwt.sign(newToken, process.env.SIGNATURE, { expiresIn: '6h' })
 }
 
-
 router.get('/login', async (req, res) => {
   // throw error if JWT header missing
+  const token = req.headers.authorisation
   try {
-    const accounts = await API.findAccounts(fakeHeader.user.id)
+    const decoded = jwt.verify(token, process.env.SIGNATURE)
+    const accounts = await API.findAccounts(decoded.id)
     // console.log(accounts)
     if (accounts.length > 0) {
       const newToken = addAccountToJWT(accounts[0], fakeHeader.token)
       res.json({ token: newToken })
       // console.log(accounts[0])
     } else {
-      API.buildAuthURL().then(URL => res.redirect(URL))
+      API.buildAuthURL().then(URL => {
+        res.status(401)
+        res.json(URL)
+      })
     }
   } catch (err) {
     res.status(500).json({ message: err.message })
@@ -52,11 +56,17 @@ router.get('/login', async (req, res) => {
 })
 
 router.get('/success', async (req, res) => {
+  // we'll change the twitter dev settings to callback to front-end, then frontend will make post to backend/twitter/success with _id and oauth tuple. this method will then store those account deets in the backend to shortcircuit the /twitter/login path next time
   try {
+    console.log('headers', req.headers)
+    const token = req.headers.authorisation
+    const decoded = jwt.verify(token, process.env.SIGNATURE)
+    console.log('decoded', decoded)
     API.requestTwitterCreds({ ...req.query }, fakeHeader.user.id)
       .then(account => {
-        const newToken = addAccountToJWT(account, fakeHeader.token)
-        res.json({ token: newToken })
+        // const newToken = addAccountToJWT(account, fakeHeader.token)
+        // res.json({ token: newToken })
+        res.redirect('http://localhost:3000/home')
       })
 
     // API.requestTwitterCreds({ ...req.query })
