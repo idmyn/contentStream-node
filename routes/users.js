@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
 router.get('/validate', async (req, res) => {
   try {
     const token = req.headers.authorisation
-    console.log(req.headers)
+    // console.log(req.headers)
     if (token) {
       const decoded = jwt.verify(token, process.env.SIGNATURE)
       const foundUser = await User.findOne({ _id: decoded.id })
@@ -67,6 +67,7 @@ router.get('/validate', async (req, res) => {
         user: serialize(foundUser),
         token
       })
+      // send buckets?
     } else {
       res.status(406)
       res.json('Invalid token')
