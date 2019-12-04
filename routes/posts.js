@@ -16,7 +16,7 @@ const serialize = (post) => (
 router.get('/', async (req, res) => {
   try {
     const posts = await Post.find()
-    res.json(posts)
+    res.json(posts.map(post => serialize(post)))
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
     const savedBucket = await bucket.save()
     console.log(savedBucket)
 
-    res.status(201).json(newPost)
+    res.status(201).json(serialize(newPost))
   } catch (err) {
     console.log(err)
     res.status(400).json({ message: err.message })

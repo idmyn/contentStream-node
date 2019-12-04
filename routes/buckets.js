@@ -4,8 +4,6 @@ const Bucket = require('../models/bucket')
 const jwt = require('jsonwebtoken')
 
 const serialize = (bucket) => {
-  // const posts = await Post.find({ bucket: bucket._id })
-  // console.log(posts)
   return {
     id: bucket._id,
     name: bucket.name,
@@ -38,8 +36,6 @@ router.get('/', async (req, res) => {
     const decoded = jwt.verify(token, process.env.SIGNATURE)
     const buckets = await Bucket.find({ user: decoded.id })
     console.log('buckets', buckets)
-    // const serialized = buckets.map(bucket => serialize(bucket))
-    // res.json(serialized)
     res.json(buckets.map(bucket => serialize(bucket)))
   } catch (err) {
     res.status(500).json({ message: err.message })
