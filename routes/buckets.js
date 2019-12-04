@@ -18,7 +18,7 @@ const getBucket = async (req, res, next) => {
   let bucket
 
   try {
-    bucket = await Bucket.findById(req.params.id)
+    bucket = await Bucket.findOne({ _id: req.params.id })
     if (bucket == null) {
       return res.status(404).json({ message: "Can't find bucket" })
     }
@@ -62,6 +62,11 @@ router.post('/', async (req, res) => {
     console.log(err)
     res.status(400).json({ message: err.message })
   }
+})
+
+// show
+router.get('/:id', getBucket, async (req, res) => {
+  res.json(serialize(res.bucket))
 })
 
 // delete

@@ -17,4 +17,8 @@ bucketSchema.pre('find', function () {
   this.populate('posts')
 })
 
+bucketSchema.pre('findOne', function () {
+  this.populate('posts')
+})
+
 module.exports = mongoose.model('Bucket', bucketSchema)
