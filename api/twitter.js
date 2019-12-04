@@ -96,6 +96,29 @@ class API {
         status: content
       }).catch(console.log)
   }
+
+  static fetchAccountDetails = (client) => {
+    return client.get('https://api.twitter.com/1.1/account/verify_credentials.json', {}).then(details => {
+      return {
+        screenName: details.screen_name
+      }
+    }).catch(console.log)
+  }
+
+  static fetchTimeline = (client) => {
+    return client.get('statuses/home_timeline', {}).then(timeline => {
+      // console.log(timeline)
+      return timeline.map(tweet => ({
+        id: tweet.id_str,
+        text: tweet.text,
+        created_at: tweet.created_at,
+        user: {
+          name: tweet.user.name,
+          screen_name: tweet.user.screen_name
+        }
+      }))
+    }).catch(console.log)
+  }
 }
 
 module.exports = API
