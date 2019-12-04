@@ -87,6 +87,7 @@ router.get('/validate', async (req, res) => {
         const client = await Twitter.buildTwitterClient(account)
         const timeline = await Twitter.fetchTimeline(client)
         resObj.timeline = timeline
+        resObj.accountId = account._id
       }
 
       console.log(resObj)
