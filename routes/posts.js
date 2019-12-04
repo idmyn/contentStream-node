@@ -12,6 +12,22 @@ const serialize = (post) => (
   }
 )
 
+const getPost = async (req, res, next) => {
+  let post
+
+  try {
+    post = await Post.findById(req.params.id)
+    if (post == null) {
+      return res.status(404).json({ message: "Can't find post" })
+    }
+  } catch (err) {
+    return res.status(500).json({ message: err.message })
+  }
+
+  res.post = post
+  next()
+}
+
 // index
 router.get('/', async (req, res) => {
   try {
@@ -43,6 +59,19 @@ router.post('/', async (req, res) => {
   } catch (err) {
     console.log(err)
     res.status(400).json({ message: err.message })
+  }
+})
+
+// delete
+router.delete('/:id', getPost, async (req, res) => {
+  try {
+    const bucket = await Bucket.findById(res.post.bucket)
+    bucket.posts = bucket.posts.filter(post => post != req.params.id)
+    await res.post.remove()
+    await bucket.save
+    res.json({ message: 'Deleted This Post' })
+  } catch (err) {
+    res.status(500).json({ message: err.message })
   }
 })
 
