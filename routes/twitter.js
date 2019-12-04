@@ -61,7 +61,7 @@ router.post('/tweet', async (req, res) => {
     if (account) {
       const client = await API.buildTwitterClient(account)
       await client.post('statuses/update', {
-        status: 'Status'
+        status: req.body.status
       }).catch(console.log)
     } else {
       res.status(401).json('You need to log into Twitter to use this feature.')
