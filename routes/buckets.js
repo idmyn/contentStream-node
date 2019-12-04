@@ -1,15 +1,18 @@
 const express = require('express')
 const router = express.Router()
 const Bucket = require('../models/bucket')
+const Post = require('../models/post')
 const jwt = require('jsonwebtoken')
 
-const serialize = (bucket) => (
-  {
+const serialize = (bucket) => {
+  // const posts = await Post.find({ bucket: bucket._id })
+  // console.log(posts)
+  return {
     id: bucket._id,
     name: bucket.name,
     posts: bucket.posts
   }
-)
+}
 
 const getBucket = async (req, res, next) => {
   let bucket
@@ -32,8 +35,15 @@ router.get('/', async (req, res) => {
   try {
     const token = req.headers.authorisation
     const decoded = jwt.verify(token, process.env.SIGNATURE)
-    const buckets = await Bucket.find({ user: decoded.id })
-    res.json(buckets.map(bucket => serialize(bucket)))
+    const buckets = await Bucket.find({ user: decoded.id }).populate('posts').exec((err, buckets) => {
+      if (err) return console.log(err)
+      res.json(buckets)
+    })
+    // console.log('buckets', buckets)
+    // console.log('decoded.id', decoded.id)
+    // const serialized = buckets.map(bucket => serialize(bucket))
+    // res.json(serialized)
+    // res.json(buckets.map(bucket => serialize(bucket)))
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
