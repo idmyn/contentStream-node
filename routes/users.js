@@ -77,7 +77,6 @@ router.get('/validate', async (req, res) => {
       const account = await Account.findOne({ user: decoded.id })
       const buckets = await Bucket.find({ user: decoded.id })
 
-      // send buckets?
       const resObj = {
         user: serialize(foundUser),
         buckets: buckets.map(bucket => serializeBucket(bucket)),

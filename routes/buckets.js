@@ -11,6 +11,22 @@ const serialize = (bucket) => (
   }
 )
 
+const getBucket = async (req, res, next) => {
+  let bucket
+
+  try {
+    bucket = await Bucket.findById(req.params.id)
+    if (bucket == null) {
+      return res.status(404).json({ message: "Can't find bucket" })
+    }
+  } catch (err) {
+    return res.status(500).json({ message: err.message })
+  }
+
+  res.bucket = bucket
+  next()
+}
+
 // index
 router.get('/', async (req, res) => {
   try {
@@ -28,7 +44,6 @@ router.post('/', async (req, res) => {
   try {
     const token = req.headers.authorisation
     const decoded = jwt.verify(token, process.env.SIGNATURE)
-    // console.log(decoded)
     const bucket = new Bucket({
       name: req.body.name,
       user: decoded.id
@@ -38,6 +53,16 @@ router.post('/', async (req, res) => {
   } catch (err) {
     console.log(err)
     res.status(400).json({ message: err.message })
+  }
+})
+
+// delete
+router.delete('/:id', getBucket, async (req, res) => {
+  try {
+    await res.bucket.remove()
+    res.json({ message: 'Deleted This Bucket' })
+  } catch (err) {
+    res.status(500).json({ message: err.message })
   }
 })
 
