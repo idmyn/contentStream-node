@@ -43,9 +43,12 @@ router.post('/', async (req, res) => {
   try {
     const bucket = await Bucket.findOne({ _id: req.body.bucketId })
     console.log('bucket:', bucket)
+    console.log('body:', req.body)
     const post = new Post({
       sourceId: req.body.sourceId,
       domain: req.body.domain,
+      sourceCreatedAt: req.body.sourceCreatedAt,
+      text: req.body.text,
       bucket: bucket._id
     })
     const newPost = await post.save()
@@ -53,7 +56,7 @@ router.post('/', async (req, res) => {
 
     bucket.posts.push(newPost._id)
     const savedBucket = await bucket.save()
-    console.log(savedBucket)
+    // console.log(savedBucket)
 
     res.status(201).json(serialize(newPost))
   } catch (err) {
