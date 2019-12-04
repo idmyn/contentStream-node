@@ -4,9 +4,20 @@ const jwt = require('jsonwebtoken')
 const express = require('express')
 const router = express.Router()
 const User = require('../models/user')
+const Bucket = require('../models/bucket')
+const Account = require('../models/account')
+const Twitter = require('../api/twitter')
 
 const serialize = (user) => (
   { id: user._id, email: user.email }
+)
+
+const serializeBucket = (bucket) => (
+  {
+    id: bucket._id,
+    name: bucket.name,
+    posts: bucket.posts
+  }
 )
 
 const generateJWT = (user) => (
@@ -63,11 +74,24 @@ router.get('/validate', async (req, res) => {
     if (token) {
       const decoded = jwt.verify(token, process.env.SIGNATURE)
       const foundUser = await User.findOne({ _id: decoded.id })
-      res.json({
-        user: serialize(foundUser),
-        token
-      })
+      const account = await Account.findOne({ user: decoded.id })
+      const buckets = await Bucket.find({ user: decoded.id })
+
       // send buckets?
+      const resObj = {
+        user: serialize(foundUser),
+        buckets: buckets.map(bucket => serializeBucket(bucket)),
+        token
+      }
+
+      if (account) {
+        const client = await Twitter.buildTwitterClient(account)
+        const timeline = await Twitter.fetchTimeline(client)
+        resObj.timeline = timeline
+      }
+
+      console.log(resObj)
+      res.json(resObj)
     } else {
       res.status(406)
       res.json('Invalid token')
