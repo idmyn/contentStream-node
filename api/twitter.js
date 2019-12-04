@@ -79,13 +79,13 @@ class API {
     }
   }
 
-  static buildTwitterClient = (creds) => {
-    console.log('hello', creds, consumerKey, consumerSecret)
+  static buildTwitterClient = (account) => {
+    console.log('building client...')
     return new Twitter({
       consumer_key: consumerKey,
       consumer_secret: consumerSecret,
-      access_token_key: creds.oauthKey,
-      access_token_secret: creds.oauthSecret
+      access_token_key: account.oauthKey,
+      access_token_secret: account.oauthSecret
     })
   }
 
