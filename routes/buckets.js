@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Bucket = require('../models/bucket')
+const Post = require('../models/post')
 const jwt = require('jsonwebtoken')
 
 const serialize = (bucket) => {
@@ -62,6 +63,7 @@ router.post('/', async (req, res) => {
 // delete
 router.delete('/:id', getBucket, async (req, res) => {
   try {
+    await Post.deleteMany({ _id: { $in: res.bucket.posts } }, (err) => console.log(err))
     await res.bucket.remove()
     res.json({ message: 'Deleted This Bucket' })
   } catch (err) {
