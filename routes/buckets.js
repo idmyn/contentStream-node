@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
   try {
     const token = req.headers.authorisation
     const decoded = jwt.verify(token, process.env.SIGNATURE)
-    const buckets = await Bucket.find({ user: decoded.id }).populate('posts').exec((err, buckets) => {
+    const buckets = await Bucket.find({ user: decoded.id }).exec((err, buckets) => {
       if (err) return console.log(err)
       res.json(buckets)
     })

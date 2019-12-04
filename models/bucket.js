@@ -13,4 +13,8 @@ const bucketSchema = new mongoose.Schema({
   posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }]
 })
 
+bucketSchema.pre('find', function () {
+  this.populate('posts')
+})
+
 module.exports = mongoose.model('Bucket', bucketSchema)
