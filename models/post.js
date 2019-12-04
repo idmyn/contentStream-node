@@ -9,7 +9,7 @@ const postSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  buckets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Bucket' }]
+  bucket: { type: mongoose.Schema.Types.ObjectId, ref: 'Bucket' }
 })
 
 module.exports = mongoose.model('Post', postSchema)
