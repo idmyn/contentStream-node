@@ -48,6 +48,10 @@ router.post('/', async (req, res) => {
   try {
     const token = req.headers.authorisation
     const decoded = jwt.verify(token, process.env.SIGNATURE)
+    const duplicates = await Bucket.find({ user: decoded.id, name: req.body.name })
+    if (duplicates.length > 0) {
+      throw new Error('You already have a bucket with the name ' + req.body.name)
+    }
     const bucket = new Bucket({
       name: req.body.name,
       user: decoded.id
