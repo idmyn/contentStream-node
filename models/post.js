@@ -5,6 +5,14 @@ const postSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  sourceCreatedAt: {
+    type: String,
+    required: true
+  },
+  text: {
+    type: String,
+    required: true
+  },
   domain: {
     type: String,
     required: true
