@@ -106,7 +106,7 @@ class API {
   }
 
   static fetchTimeline = (client) => {
-    return client.get('statuses/home_timeline', {}).then(timeline => {
+    return client.get('statuses/home_timeline', { count: 50 }).then(timeline => {
       // console.log(timeline)
       return timeline.map(tweet => ({
         id: tweet.id_str,
