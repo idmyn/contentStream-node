@@ -123,7 +123,6 @@ router.post('/', async (req, res) => {
 
   try {
     if (req.body.password !== req.body.passwordConfirmation) {
-      console.log(req.body.password, req.body.passwordConfirmation)
       throw new Error("Passwords don't match.")
     }
     const newUser = await user.save()
