@@ -44,6 +44,9 @@ router.post('/', async (req, res) => {
     const bucket = await Bucket.findOne({ _id: req.body.bucketId })
     console.log('bucket:', bucket)
     console.log('body:', req.body)
+    if (bucket.posts.map(post => post.sourceId).includes(req.body.sourceId)) {
+      throw new Error('This post was in this bucket already.')
+    }
     const post = new Post({
       sourceId: req.body.sourceId,
       domain: req.body.domain,
