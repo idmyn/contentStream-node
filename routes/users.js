@@ -70,7 +70,6 @@ router.post('/login', async (req, res) => {
 router.get('/validate', async (req, res) => {
   try {
     const token = req.headers.authorisation
-    // console.log(req.headers)
     if (token) {
       const decoded = jwt.verify(token, process.env.SIGNATURE)
       const foundUser = await User.findOne({ _id: decoded.id })
@@ -113,7 +112,9 @@ router.get('/', async (req, res) => {
 
 // create
 router.post('/', async (req, res) => {
-  const passwordHash = await argon2.hash(req.body.password)
+  const passwordHash = req.body.password.length > 0
+    ? await argon2.hash(req.body.password)
+    : ''
 
   const user = new User({
     email: req.body.email,
@@ -121,6 +122,10 @@ router.post('/', async (req, res) => {
   })
 
   try {
+    if (req.body.password !== req.body.passwordConfirmation) {
+      console.log(req.body.password, req.body.passwordConfirmation)
+      throw new Error("Passwords don't match.")
+    }
     const newUser = await user.save()
     res.status(201).json({
       user: serialize(newUser),
